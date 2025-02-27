@@ -65,7 +65,7 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
 
 
     }
-        .map { NewsFeedResult.Success(post = it) }
+        .map { NewsFeedResult.Success(post = it) as NewsFeedResult}
         .retry (2){
         delay(RETRY_TIMEOUT_MILLIS)
         true
