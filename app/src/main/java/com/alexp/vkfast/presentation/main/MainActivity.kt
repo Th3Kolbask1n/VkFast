@@ -1,0 +1,107 @@
+package com.alexp.vkfast.presentation.main
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.alexp.vkfast.ui.theme.vkfastTheme
+import com.vk.id.VKID
+
+
+class MainActivity : ComponentActivity() {
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
+        VKID.init(this)
+        val viewModel by viewModels<MainViewModel>()
+
+        enableEdgeToEdge()
+        setContent {
+
+            vkfastTheme {
+
+                val authState by viewModel.authState.collectAsState()
+
+
+
+                LaunchedEffect(authState) {
+
+                    when (authState) {
+                        AuthState.Authorized -> {
+                            Log.d("Auth", "User is authorized")
+                        }
+
+                        AuthState.NotAuthorized -> {
+                            Log.d("Auth", "User is not authorized")
+                        }
+
+                        AuthState.Initial -> {
+                            Log.d("Auth", "Initial state")
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+
+                    when (authState) {
+                        AuthState.Authorized -> {
+                            MainScreen()
+                        }
+
+                        AuthState.NotAuthorized -> LoginScreen()
+                        AuthState.Initial -> { }
+                    }
+
+
+                }
+
+
+            }
+        }
+
+    }
+}
+
+
+//@Composable
+//private fun TextText(
+//    count: Int,
+//    text: String
+//) {
+//    repeat(count)
+//    {
+//        Text(text = text)
+//    }
+//}
+//
+//@Composable
+//fun TestText() {
+//    Image(
+//        modifier = Modifier.clip(CircleShape),
+//        painter = painterResource(R.drawable.ic_instagram),
+//        contentDescription = "",
+//        contentScale = ContentScale.Crop
+//    )
+//
+//}
+//
