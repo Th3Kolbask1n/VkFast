@@ -6,15 +6,15 @@ import com.alexp.vkfast.data.repository.NewsFeedRepositoryImpl
 import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.domain.usecases.GetCommentsUseCase
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class CommentsViewModel(
-    newsItem: NewsItem,
-    application: Application
+class CommentsViewModel@Inject constructor(
+    private val newsItem: NewsItem,
+    private val getCommentsUseCase : GetCommentsUseCase
+
 ): ViewModel() {
 
-    private val repository = NewsFeedRepositoryImpl(application)
 
-    private val getCommentsUseCase = GetCommentsUseCase(repository)
 
     val screenState = getCommentsUseCase(newsItem)
         .map { CommentsScreenState.Comments(

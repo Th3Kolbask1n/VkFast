@@ -14,9 +14,21 @@ interface NewsFeedRepository {
     fun getAccessToken(): String
     fun getComments(newsItem: NewsItem): StateFlow<List<PostComment>>
 
+
+    //authorization
+    suspend fun authorizeUser()
+
+
+    //news
     suspend fun loadMoreNews()
     suspend fun updateLikeStatus(newsItem: NewsItem)
     suspend fun removeNewsItem(newsItem: NewsItem)
+
+
+    //faves
+    suspend fun updateFavouriteStatus(newsItem: NewsItem)
+    fun getFavourites():StateFlow<NewsFeedResult>
+    suspend fun loadMoreFavouritePost()
 
 
 }

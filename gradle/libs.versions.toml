@@ -1,0 +1,89 @@
+[versions]
+agp = "8.6.1"
+androidDesugar_jdk_libs = "2.1.2"
+appcompat = "1.7.0"
+coreKtx = "1.15.0"
+desugar_jdk_libs = "2.1.4"
+desugar_jdk_libsVersion = "2.0.4"
+hiltNavigationCompose = "1.2.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleExtensions = "2.2.0"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.04.01"
+compose_livedata_version = "1.7.6"
+oauthVk = "1.0"
+onetapCompose = "2.2.2"
+uiUtil = "1.7.7"
+navigation_version = "2.8.5"
+gson_version="2.11.0"
+kotlin ="2.1.10"
+vk_version="4.1.0"
+vkid = "2.2.2"
+vkidVersion = "1.0"
+vksdkPub = "1.0"
+foundationLayoutAndroid = "1.7.2"
+coil_version="3.0.4"
+okHttpClient_version="4.12.0"
+retrofit_version="2.11.0"
+storage = "1.5.0"
+ksp_version ="2.1.10-1.0.29"
+dagger2_version = "2.55"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+androidx-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "uiUtil" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+desugar_jdk_libs-v204 = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libsVersion" }
+desugar_jdk_libs-v212 = { module = "com.android.tools:desugar_jdk_libs", version.ref = "androidDesugar_jdk_libs" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref ="compose_livedata_version" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation_version" }
+gson = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref ="gson_version"}
+coil = {group = "io.coil-kt.coil3", name = "coil-compose", version.ref ="coil_version"}
+#VK базовая функциональность
+onetap-compose = { module = "com.vk.id:onetap-compose", version.ref = "onetapCompose" }
+vk-core = {group = "com.vk", name = "android-sdk-core", version.ref ="vk_version"}
+#VK сгенерированные модели и методы
+vk-api = {group = "com.vk", name = "android-sdk-api", version.ref ="vk_version"}
+vkid = { module = "com.vk.id:vkid", version.ref = "vkid" }
+androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
+coil-compose = {group = "io.coil-kt.coil3", name = "coil-compose", version.ref ="coil_version"}
+coil-network = {group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref ="coil_version"}
+okHttpClient = {group = "com.squareup.okhttp3", name = "okhttp", version.ref ="okHttpClient_version"}
+httpLoggingInterceptor = {group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref ="okHttpClient_version"}
+retrofit = {group = "com.squareup.retrofit2", name = "retrofit", version.ref ="retrofit_version"}
+androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
+#Dagger2
+dagger2 = { group = "com.google.dagger", name = "dagger", version.ref = "dagger2_version" }
+#Dagger2 кодогенратор
+dagger2-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger2_version" }
+#Dagger2 аннотации
+dagger2-android-processor = { group = "com.google.dagger", name = "dagger-android-processor", version.ref = "dagger2_version" }
+
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = {id = "com.google.devtools.ksp", version.ref ="ksp_version"}

@@ -35,13 +35,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_18
-        targetCompatibility = JavaVersion.VERSION_18
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
 
     }
     kotlinOptions {
-        jvmTarget = "18"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -90,7 +90,7 @@ dependencies {
     implementation(libs.okHttpClient)
     implementation(libs.retrofit)
     implementation(libs.androidx.storage)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")
+    coreLibraryDesugaring(libs.desugar.jdk.libs.v212)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.dagger2)

@@ -1,4 +1,4 @@
-package com.alexp.vkfast.presentation.news
+package com.alexp.vkfast.presentation.favourites
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -34,35 +34,39 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alexp.vkfast.R
 import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.presentation.getApplicationComponent
+import com.alexp.vkfast.presentation.news.PostCard
 import com.alexp.vkfast.ui.theme.DarkBlue
 
 @Composable
-fun NewsFeedScreen(
+fun FavouritePostsScreen(
     paddingValues: PaddingValues,
     onCommentClickListener: (NewsItem) -> Unit
 ) {
+
     val component = getApplicationComponent()
-    val viewModel: NewsViewModel = viewModel(factory = component.getViewModelFactory())
+    val viewModel: FavouritePostsViewModel = viewModel(factory = component.getViewModelFactory())
     val screenState by viewModel.screenState.collectAsState()
 
-    NewsFeedScreenContent(
-        screenState = screenState,
-        paddingValues = paddingValues,
-        onCommentClickListener = onCommentClickListener,
-        viewModel = viewModel)
+    FavouritePostsScreenContent(
+            screenState = screenState,
+            paddingValues = paddingValues,
+            onCommentClickListener = onCommentClickListener,
+            viewModel = viewModel
+            )
 }
 
 
 @Composable
-private fun NewsFeedScreenContent(
-    screenState: NewsFeedScreenState,
+private fun FavouritePostsScreenContent(
+    screenState: FavouritePostsScreenState,
     paddingValues: PaddingValues,
     onCommentClickListener: (NewsItem) -> Unit,
-    viewModel: NewsViewModel
+    viewModel: FavouritePostsViewModel
 )
 {
+
     when (screenState) {
-        is NewsFeedScreenState.Posts -> {
+        is FavouritePostsScreenState.Posts -> {
             NewsItems(
                 posts = screenState.posts,
                 viewModel = viewModel,
@@ -72,10 +76,10 @@ private fun NewsFeedScreenContent(
             )
         }
 
-        is NewsFeedScreenState.Initial -> {
+        is FavouritePostsScreenState.Initial -> {
         }
 
-        is NewsFeedScreenState.Loading -> {
+        is FavouritePostsScreenState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -84,7 +88,7 @@ private fun NewsFeedScreenContent(
             }
         }
 
-        is NewsFeedScreenState.Error -> {
+        is FavouritePostsScreenState.Error -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -114,7 +118,7 @@ private fun NewsFeedScreenContent(
         }
 
 
-        NewsFeedScreenState.Empty -> {
+        FavouritePostsScreenState.Empty -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -132,7 +136,7 @@ private fun NewsFeedScreenContent(
 @Composable
 private fun NewsItems(
     posts:List<NewsItem>,
-    viewModel: NewsViewModel,
+    viewModel: FavouritePostsViewModel,
     paddingValues: PaddingValues,
     onCommentClickListener: (NewsItem) -> Unit,
     nextDataIsLoading:Boolean
@@ -155,13 +159,7 @@ private fun NewsItems(
                 confirmValueChange = {
                         value->
 
-                    val isDismissed = value in setOf(
-                        SwipeToDismissBoxValue.EndToStart
-                    )
-                    if(isDismissed)
-                    {
-                        viewModel.remove(newsItem)
-                    }
+
                     val isFavorite = value in setOf(
                         SwipeToDismissBoxValue.Settled
                     )
@@ -169,14 +167,14 @@ private fun NewsItems(
                     {
                         viewModel.changeFavouriteStatus(newsItem)
                     }
-                    return@rememberSwipeToDismissBoxState isDismissed||isFavorite
+                    return@rememberSwipeToDismissBoxState isFavorite
                 }
             )
             SwipeToDismissBox(
                 modifier = Modifier.animateItem(),
                 state = dissmissState,
                 enableDismissFromStartToEnd = false,
-                enableDismissFromEndToStart = true,
+                enableDismissFromEndToStart = false,
                 backgroundContent =  {}){
 
 

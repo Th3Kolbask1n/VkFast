@@ -5,8 +5,9 @@ import com.alexp.vkfast.domain.entity.PostComment
 import com.alexp.vkfast.domain.repository.NewsFeedRepository
 import com.alexp.vkfast.presentation.main.AuthState
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class GetAuthStateUseCase(
+class GetAuthStateUseCase @Inject constructor(
     private val repository: NewsFeedRepository
 ) {
 

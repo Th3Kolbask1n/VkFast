@@ -16,11 +16,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.alexp.vkfast.presentation.NewsFeedApplication
+import com.alexp.vkfast.presentation.ViewModelFactory
+import com.alexp.vkfast.presentation.getApplicationComponent
 import com.alexp.vkfast.ui.theme.vkfastTheme
 import com.vk.id.VKID
+import javax.inject.Inject
 
 
 class MainActivity : ComponentActivity() {
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,14 +35,16 @@ class MainActivity : ComponentActivity() {
 
 
         VKID.init(this)
-        val viewModel by viewModels<MainViewModel>()
 
         enableEdgeToEdge()
         setContent {
 
-            vkfastTheme {
+            val component = getApplicationComponent()
+            val viewModel:MainViewModel = viewModel(factory = component.getViewModelFactory())
 
-                val authState by viewModel.authState.collectAsState()
+            val authState by viewModel.authState.collectAsState()
+
+            vkfastTheme {
 
 
 

@@ -1,4 +1,4 @@
-package com.alexp.vkfast.presentation.news
+package com.alexp.vkfast.presentation.favourites
 
 import android.app.Application
 import android.util.Log
@@ -11,8 +11,10 @@ import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.domain.entity.NewsFeedResult
 import com.alexp.vkfast.domain.usecases.UpdateLikeStatusUseCase
 import com.alexp.vkfast.domain.usecases.DeletePostUseCase
+import com.alexp.vkfast.domain.usecases.GetFavouritesUseCase
 import com.alexp.vkfast.domain.usecases.GetRecommendationsUseCase
 import com.alexp.vkfast.domain.usecases.LoadNextDataUseCase
+import com.alexp.vkfast.domain.usecases.LoadNextFavouriteDataUseCase
 import com.alexp.vkfast.domain.usecases.UpdateFavouriteStatusUseCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,23 +26,23 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class NewsViewModel @Inject constructor
+class FavouritePostsViewModel @Inject constructor
     (
 
-    private val getRecommendationsUseCase: GetRecommendationsUseCase,
-    private val loadNextDataUseCase: LoadNextDataUseCase,
+    private val getFavouritePostUseCase: GetFavouritesUseCase,
+    private val loadNextDataUseCase: LoadNextFavouriteDataUseCase,
     private val updateLikeStatusUseCase: UpdateLikeStatusUseCase,
     private val deletePostUseCase: DeletePostUseCase,
     private val updateFavouriteStatusUseCase: UpdateFavouriteStatusUseCase
 
 ) : ViewModel() {
 
-    private val newsFlow = getRecommendationsUseCase()
+    private val newsFlow = getFavouritePostUseCase()
 
-    private val loadNextDataFlow = MutableSharedFlow<NewsFeedScreenState>()
+    private val loadNextDataFlow = MutableSharedFlow<FavouritePostsScreenState>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
-        Log.d("NewsFeedViewModel", "Exception caught")
+        Log.d("FavouritePostsViewModel", "Exception caught")
     }
 
 
@@ -49,22 +51,22 @@ class NewsViewModel @Inject constructor
             when (result) {
                 is NewsFeedResult.Success -> {
                     if (result.post.isNotEmpty()) {
-                        NewsFeedScreenState.Posts(posts = result.post)
+                        FavouritePostsScreenState.Posts(posts = result.post)
                     } else {
-                        NewsFeedScreenState.Empty
+                        FavouritePostsScreenState.Empty
                     }
                 }
 
-                is NewsFeedResult.Error -> NewsFeedScreenState.Error(
-                    "pplication.applicationContext.getString(R.string.cant_loading_posts)"
+                is NewsFeedResult.Error -> FavouritePostsScreenState.Error(
+                    "Application.applicationContext.getString(R.string.cant_loading_posts)"
                 )
             }
         }
-        .onStart { emit(NewsFeedScreenState.Loading) }
+        .onStart { emit(FavouritePostsScreenState.Loading) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = NewsFeedScreenState.Loading
+            initialValue = FavouritePostsScreenState.Loading
         )
 
 
@@ -73,7 +75,7 @@ class NewsViewModel @Inject constructor
             val currentPosts =
                 (newsFlow.firstOrNull() as? NewsFeedResult.Success)?.post ?: emptyList()
             loadNextDataFlow.emit(
-                NewsFeedScreenState.Posts(
+                FavouritePostsScreenState.Posts(
                     posts = currentPosts,
                     nextDataIsLoading = true
                 )

@@ -1,8 +1,10 @@
 package com.alexp.vkfast.data.repository
 
 import android.app.Application
+import android.util.Log
 import com.alexp.vkfast.data.mapper.NewsFeedMapper
 import com.alexp.vkfast.data.network.ApiFactory
+import com.alexp.vkfast.data.network.ApiService
 import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.domain.entity.NewsFeedResult
 import com.alexp.vkfast.domain.entity.PostComment
@@ -29,12 +31,23 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
+class NewsFeedRepositoryImpl @Inject constructor
+    (
+    private val apiService: ApiService,
+    private val mapper: NewsFeedMapper
+) : NewsFeedRepository {
 
     private val token
-        get() =  VKID.instance.accessToken?.token
+        get() = VKID.instance.accessToken?.token
 
+
+    private val _newsItems = mutableListOf<NewsItem>()
+    private val newsItems: List<NewsItem>
+        get() = _newsItems.toList()
+
+    private var nextFrom: String? = null
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val nextDataNeededEvents = MutableSharedFlow<Unit>(replay = 1)
@@ -65,28 +78,21 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
 
 
     }
-        .map { NewsFeedResult.Success(post = it) as NewsFeedResult}
-        .retry (2){
-        delay(RETRY_TIMEOUT_MILLIS)
-        true
-    }.catch {
+        .map { NewsFeedResult.Success(post = it) as NewsFeedResult }
+        .retry(2) {
+            delay(RETRY_TIMEOUT_MILLIS)
+            true
+        }.catch {
 
-        emit(NewsFeedResult.Error)
-    }
+            emit(NewsFeedResult.Error)
+        }
 
-    private val apiService = ApiFactory.apiService
-    private val mapper = NewsFeedMapper()
 
-    private val _newsItems = mutableListOf<NewsItem>()
-    private val newsItems: List<NewsItem>
-        get() = _newsItems.toList()
 
-    private var nextFrom: String? = null
+
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.NotAuthorized)
     private val authStateFlow: StateFlow<AuthState> = _authState
-
-
 
 
     private val vkAuthCallback = object : VKIDAuthCallback {
@@ -98,7 +104,8 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
             _authState.value = AuthState.NotAuthorized
         }
     }
-    suspend fun authorizeUser() {
+
+    override suspend fun authorizeUser() {
 
         VKID.instance.authorize(
             callback = vkAuthCallback,
@@ -117,13 +124,66 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
             initialValue = NewsFeedResult.Success(newsItems)
         )
 
+    private var nextFavouriteFrom: String? = null
+    private val _newsFavouriteItems = mutableListOf<NewsItem>()
+    private val newsFavouriteItems: List<NewsItem>
+        get() = _newsFavouriteItems.toList()
+
+    private val nextRecomendationDataNeededEvents = MutableSharedFlow<Unit>(replay = 1)
+    private val refreshedRecomendationListFlow = MutableSharedFlow<List<NewsItem>>()
+    private val loadRecomendationListFlow = flow {
+
+        nextRecomendationDataNeededEvents.emit(Unit)
+        nextRecomendationDataNeededEvents.collect {
+            val startFrom = nextFavouriteFrom
+            if (startFrom == null && newsFavouriteItems.isNotEmpty()) {
+                emit(newsFavouriteItems)
+                return@collect
+            }
+            val response =
+                if (startFrom == null) {
+
+                    apiService.loadFavouritesPosts(getAccessToken())
+
+                } else {
+                    apiService.loadFavouritesPosts(getAccessToken(), startFrom)
+                }
+
+            nextFavouriteFrom = response.favPostsContent.nextFrom
+            val posts = mapper.mapFavouriteResponseToPosts(response)
+            _newsFavouriteItems.addAll(posts)
+            emit(newsFavouriteItems)
+        }
+
+
+    }
+        .map { NewsFeedResult.Success(post = it) as NewsFeedResult }
+        .retry(2) {
+            delay(RETRY_TIMEOUT_MILLIS)
+            true
+        }.catch {
+
+            emit(NewsFeedResult.Error)
+        }
+
+    private val favouritesPosts: StateFlow<NewsFeedResult> = loadRecomendationListFlow
+        .mergeWith(refreshedRecomendationListFlow.map { NewsFeedResult.Success(it) })
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = NewsFeedResult.Success(newsItems)
+        )
+
+
+
     override fun getAuthStateFlow(): StateFlow<AuthState> {
         return _authState
     }
 
     override fun getRecommendations(): StateFlow<NewsFeedResult> {
-       return recommendations
+        return recommendations
     }
+
 
     override suspend fun loadMoreNews() {
         nextDataNeededEvents.emit(Unit)
@@ -171,6 +231,39 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
         )
         _newsItems.remove(newsItem)
         refreshedListFlow.emit(newsItems)
+
+
+    }
+
+    override suspend fun updateFavouriteStatus(newsItem: NewsItem) {
+        val response = if (newsItem.isFavourite) {
+            apiService.deleteFromFavouriteList(
+                token = getAccessToken(),
+                ownerId = newsItem.groupId,
+                postId = newsItem.newsId
+            )
+            val postIndex = _newsFavouriteItems.indexOf(newsItem)
+
+            _newsFavouriteItems.removeAt(postIndex)
+            refreshedRecomendationListFlow.emit(newsFavouriteItems)
+
+
+        } else {
+            apiService.addToFavouriteList(
+                token = getAccessToken(),
+                ownerId = newsItem.groupId,
+                postId = newsItem.newsId
+            )
+            refreshedRecomendationListFlow.emit(newsFavouriteItems)
+        }
+
+
+
+
+    }
+
+    override fun getFavourites(): StateFlow<NewsFeedResult> {
+        return favouritesPosts
     }
 
     override fun getComments(newsItem: NewsItem): StateFlow<List<PostComment>> = flow {
@@ -190,6 +283,11 @@ class NewsFeedRepositoryImpl(application: Application) :NewsFeedRepository{
         listOf()
     )
 
+    override suspend fun loadMoreFavouritePost() {
+        nextRecomendationDataNeededEvents.emit(Unit)
+
+
+    }
 
     companion object {
         private const val RETRY_TIMEOUT_MILLIS = 3000L

@@ -2,18 +2,24 @@ package com.alexp.vkfast.presentation.main
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alexp.vkfast.data.repository.NewsFeedRepositoryImpl
+import com.alexp.vkfast.domain.usecases.AuthorizeUseCase
 import com.alexp.vkfast.domain.usecases.GetAuthStateUseCase
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(application: Application) : AndroidViewModel(application){
+class MainViewModel@Inject constructor
+    (
+    private val getAuthStateUseCase : GetAuthStateUseCase,
+    private val authorizeUseCase : AuthorizeUseCase
 
 
-    private val repository = NewsFeedRepositoryImpl(application)
+) : ViewModel(){
 
-    private val getAuthStateUseCase = GetAuthStateUseCase(repository)
+
     val authState = getAuthStateUseCase()
 
 
@@ -23,7 +29,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application){
 
     fun authorizeUser() {
         viewModelScope.launch {
-            repository.authorizeUser()
+            authorizeUseCase()
         }
     }
 

@@ -25,11 +25,12 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.alexp.vkfast.navigation.AppNavGraph
 import com.alexp.vkfast.navigation.rememberNavigationState
+import com.alexp.vkfast.presentation.ViewModelFactory
 import com.alexp.vkfast.presentation.comments.CommentsScreen
+import com.alexp.vkfast.presentation.favourites.FavouritePostsScreen
 import com.alexp.vkfast.presentation.news.NewsFeedScreen
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @Composable
 
@@ -89,8 +90,17 @@ fun MainScreen() {
                     )
 
             },
-            favouriteScreenContent = { },
-            profileScreenContent = { },
+            favouriteScreenContent = {
+                FavouritePostsScreen(
+                    paddingValues = paddingValues,
+                    onCommentClickListener = {
+                        navigationState.navigateToComments(it)
+                    }
+                )
+            },
+            profileScreenContent = {
+
+            },
             commentScreenContent = { newsItem->
                 CommentsScreen(
                     onBackPressed = { navigationState.navHostController.popBackStack() },
