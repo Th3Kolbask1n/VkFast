@@ -24,6 +24,8 @@ sealed class Screen(
             return "$ROUTE_FOR_ARGS/${newsItemJson.encode()}"
         }
     }
+    object Auth : Screen("auth")
+
 
 
     companion object

@@ -10,6 +10,7 @@ import com.alexp.vkfast.domain.entity.NewsFeedResult
 import com.alexp.vkfast.domain.entity.PostComment
 import com.alexp.vkfast.domain.entity.StatisticItem
 import com.alexp.vkfast.domain.entity.StatisticType
+import com.alexp.vkfast.domain.entity.UserInfo
 import com.alexp.vkfast.domain.repository.NewsFeedRepository
 import com.alexp.vkfast.extensions.mergeWith
 import com.alexp.vkfast.presentation.main.AuthState
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
+import java.io.IOException
 import javax.inject.Inject
 
 class NewsFeedRepositoryImpl @Inject constructor
@@ -54,10 +56,11 @@ class NewsFeedRepositoryImpl @Inject constructor
     private val refreshedListFlow = MutableSharedFlow<List<NewsItem>>()
     private val loadedListFlow = flow {
 
-
         nextDataNeededEvents.emit(Unit)
         nextDataNeededEvents.collect {
             val startFrom = nextFrom
+
+
             if (startFrom == null && newsItems.isNotEmpty()) {
                 emit(newsItems)
                 return@collect
@@ -71,6 +74,7 @@ class NewsFeedRepositoryImpl @Inject constructor
                     apiService.loadRecommendations(getAccessToken(), startFrom)
                 }
             nextFrom = response.newsFeedContent.nextFrom
+
             val posts = mapper.mapResponseToPosts(response)
             _newsItems.addAll(posts)
             emit(newsItems)
@@ -129,12 +133,13 @@ class NewsFeedRepositoryImpl @Inject constructor
     private val newsFavouriteItems: List<NewsItem>
         get() = _newsFavouriteItems.toList()
 
-    private val nextRecomendationDataNeededEvents = MutableSharedFlow<Unit>(replay = 1)
-    private val refreshedRecomendationListFlow = MutableSharedFlow<List<NewsItem>>()
-    private val loadRecomendationListFlow = flow {
+    private val nextFavouriteDataNeededEvents = MutableSharedFlow<Unit>(replay = 1)
+    private val refreshedFavoutiteListFlow = MutableSharedFlow<List<NewsItem>>()
+    private val loadFavouriteListFlow = flow {
 
-        nextRecomendationDataNeededEvents.emit(Unit)
-        nextRecomendationDataNeededEvents.collect {
+        nextFavouriteDataNeededEvents.emit(Unit)
+        nextFavouriteDataNeededEvents.collect {
+
             val startFrom = nextFavouriteFrom
             if (startFrom == null && newsFavouriteItems.isNotEmpty()) {
                 emit(newsFavouriteItems)
@@ -166,8 +171,8 @@ class NewsFeedRepositoryImpl @Inject constructor
             emit(NewsFeedResult.Error)
         }
 
-    private val favouritesPosts: StateFlow<NewsFeedResult> = loadRecomendationListFlow
-        .mergeWith(refreshedRecomendationListFlow.map { NewsFeedResult.Success(it) })
+    private val favouritesPosts: StateFlow<NewsFeedResult> = loadFavouriteListFlow
+        .mergeWith(refreshedFavoutiteListFlow.map { NewsFeedResult.Success(it) })
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.Lazily,
@@ -245,7 +250,7 @@ class NewsFeedRepositoryImpl @Inject constructor
             val postIndex = _newsFavouriteItems.indexOf(newsItem)
 
             _newsFavouriteItems.removeAt(postIndex)
-            refreshedRecomendationListFlow.emit(newsFavouriteItems)
+            refreshedFavoutiteListFlow.emit(newsFavouriteItems)
 
 
         } else {
@@ -254,7 +259,8 @@ class NewsFeedRepositoryImpl @Inject constructor
                 ownerId = newsItem.groupId,
                 postId = newsItem.newsId
             )
-            refreshedRecomendationListFlow.emit(newsFavouriteItems)
+            refreshedFavoutiteListFlow.emit(newsFavouriteItems)
+
         }
 
 
@@ -273,9 +279,13 @@ class NewsFeedRepositoryImpl @Inject constructor
             postId = newsItem.newsId
         )
         emit(mapper.mapResponseToComments(comments))
-    }.retry {
-        delay(RETRY_TIMEOUT_MILLIS)
-        true
+    }.retry {cause ->
+        if (cause is IOException) {
+            delay(RETRY_TIMEOUT_MILLIS)
+            true
+        } else {
+            false
+        }
 
     }.stateIn(
         scope = coroutineScope,
@@ -284,10 +294,27 @@ class NewsFeedRepositoryImpl @Inject constructor
     )
 
     override suspend fun loadMoreFavouritePost() {
-        nextRecomendationDataNeededEvents.emit(Unit)
+        nextFavouriteDataNeededEvents.emit(Unit)
 
 
     }
+    override fun getProfileInfo(): StateFlow<UserInfo?> = flow {
+        val userInfo = apiService.getProfileInfo(
+            token = getAccessToken()
+        )
+        emit(mapper.mapResponseToProfileInfo(userInfo))
+    }.retry { cause ->
+        if (cause is IOException) {
+            delay(RETRY_TIMEOUT_MILLIS)
+            true
+        } else {
+            false
+        }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = null
+    )
 
     companion object {
         private const val RETRY_TIMEOUT_MILLIS = 3000L

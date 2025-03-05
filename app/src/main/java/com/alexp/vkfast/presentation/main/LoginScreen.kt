@@ -49,8 +49,9 @@ fun LoginScreen(
                {
 
                }
+
            },
-               signInAnotherAccountButtonEnabled = false,
+               signInAnotherAccountButtonEnabled = true,
                onFail = { oAuth, fail ->
                 when (fail) {
                     is VKIDAuthFail.Canceled -> {}

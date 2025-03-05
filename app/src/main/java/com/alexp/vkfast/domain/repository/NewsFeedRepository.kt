@@ -3,6 +3,7 @@ package com.alexp.vkfast.domain.repository
 import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.domain.entity.NewsFeedResult
 import com.alexp.vkfast.domain.entity.PostComment
+import com.alexp.vkfast.domain.entity.UserInfo
 import com.alexp.vkfast.presentation.main.AuthState
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,5 +31,7 @@ interface NewsFeedRepository {
     fun getFavourites():StateFlow<NewsFeedResult>
     suspend fun loadMoreFavouritePost()
 
+    //user_info
+    fun getProfileInfo():StateFlow<UserInfo?>
 
 }

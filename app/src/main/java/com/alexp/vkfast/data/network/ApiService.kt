@@ -5,6 +5,7 @@ import com.alexp.vkfast.data.model.CommentsResponseDto
 import com.alexp.vkfast.data.model.FavouritesPostsResponseDto
 import com.alexp.vkfast.data.model.LikesCountResponseDto
 import com.alexp.vkfast.data.model.NewFeedResponseDto
+import com.alexp.vkfast.data.model.UserInfoResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -82,5 +83,8 @@ interface ApiService {
         @Query("start_from") startFrom:String
     ):FavouritesPostsResponseDto
 
-
+    @GET("account.getProfileInfo?v=5.199")
+    suspend fun getProfileInfo(
+        @Query("access_token") token:String,
+    ): UserInfoResponseDto
 }

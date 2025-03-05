@@ -4,10 +4,12 @@ import android.util.Log
 import com.alexp.vkfast.data.model.CommentsResponseDto
 import com.alexp.vkfast.data.model.FavouritesPostsResponseDto
 import com.alexp.vkfast.data.model.NewFeedResponseDto
+import com.alexp.vkfast.data.model.UserInfoResponseDto
 import com.alexp.vkfast.domain.entity.NewsItem
 import com.alexp.vkfast.domain.entity.PostComment
 import com.alexp.vkfast.domain.entity.StatisticItem
 import com.alexp.vkfast.domain.entity.StatisticType
+import com.alexp.vkfast.domain.entity.UserInfo
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
@@ -78,7 +80,6 @@ class NewsFeedMapper @Inject constructor(){
 
         for (postResponse in posts) {
 
-            Log.d("WHIE","${groups}")
             val post = postResponse.favPostsList
             val group = groups.find {
                 it.id == post.communityId.absoluteValue
@@ -107,7 +108,28 @@ class NewsFeedMapper @Inject constructor(){
         return result
     }
 
+    fun mapResponseToProfileInfo(response: UserInfoResponseDto):UserInfo{
 
+        val userInfo = response.userInfoContent
+
+        return UserInfo(
+            id = userInfo.id,
+            homeTown = userInfo.homeTown,
+            status = userInfo.status,
+            photo200 = userInfo.photo200,
+            isServiceAccount = userInfo.isServiceAccount,
+            birthDate = userInfo.birthDate,
+            verificationStatus = userInfo.verificationStatus,
+            firstName = userInfo.firstName,
+            lastName = userInfo.lastName,
+            bdateVisibility = userInfo.bdateVisibility,
+            city = userInfo.city, // Обрабатываем город
+            phone = userInfo.phone,
+            relation = userInfo.relation,
+            sex = userInfo.sex
+        )
+
+    }
     private fun mapTimestampToDate(timestamp: Long):String
     {
         val date = Date(timestamp*1000)

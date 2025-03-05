@@ -68,7 +68,7 @@ private fun NewsFeedScreenContent(
                 viewModel = viewModel,
                 paddingValues = paddingValues,
                 onCommentClickListener = onCommentClickListener,
-                nextDataIsLoading = screenState.nextDataIsLoading
+                nextDataIsLoading = screenState
             )
         }
 
@@ -135,7 +135,7 @@ private fun NewsItems(
     viewModel: NewsViewModel,
     paddingValues: PaddingValues,
     onCommentClickListener: (NewsItem) -> Unit,
-    nextDataIsLoading:Boolean
+    nextDataIsLoading:NewsFeedScreenState
 )
 {
 
@@ -151,7 +151,7 @@ private fun NewsItems(
     ){
         items(items = posts, key = { it.newsId })
         { newsItem ->
-            val dissmissState = rememberSwipeToDismissBoxState(
+            val dismissState = rememberSwipeToDismissBoxState(
                 confirmValueChange = {
                         value->
 
@@ -174,7 +174,7 @@ private fun NewsItems(
             )
             SwipeToDismissBox(
                 modifier = Modifier.animateItem(),
-                state = dissmissState,
+                state = dismissState,
                 enableDismissFromStartToEnd = false,
                 enableDismissFromEndToStart = true,
                 backgroundContent =  {}){
@@ -195,20 +195,24 @@ private fun NewsItems(
             }
         }
     item {
-        if(nextDataIsLoading){
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp),
-                contentAlignment = Alignment.Center)
-            {
-                CircularProgressIndicator(color = DarkBlue)
-            }
-        }
-        else{
-            SideEffect {
-                viewModel.loadNextRecommendations()
+        if(nextDataIsLoading is NewsFeedScreenState.Posts) {
 
+            if (nextDataIsLoading.nextDataIsLoading)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                )
+                {
+                    CircularProgressIndicator(color = DarkBlue)
+                }
+            else {
+                SideEffect {
+                    viewModel.loadNextRecommendations()
+
+                }
             }
         }
     }

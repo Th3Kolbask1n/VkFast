@@ -5,6 +5,7 @@ import com.alexp.vkfast.presentation.comments.CommentsViewModel
 import com.alexp.vkfast.presentation.favourites.FavouritePostsViewModel
 import com.alexp.vkfast.presentation.main.MainViewModel
 import com.alexp.vkfast.presentation.news.NewsViewModel
+import com.alexp.vkfast.presentation.userinfo.AccountViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -29,5 +30,11 @@ interface ViewModelModule {
     @ViewModelKey(FavouritePostsViewModel::class)
     @Binds
     fun bindFavouritePostsViewModel(viewModel: FavouritePostsViewModel): ViewModel
+
+
+    @IntoMap
+    @ViewModelKey(AccountViewModel::class)
+    @Binds
+    fun bindAAccountViewModelViewModel(viewModel: AccountViewModel): ViewModel
 
 }

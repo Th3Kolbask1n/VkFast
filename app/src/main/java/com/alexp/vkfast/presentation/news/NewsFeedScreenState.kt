@@ -9,7 +9,7 @@ sealed class NewsFeedScreenState {
 
     data class Posts(
         val posts: List<NewsItem>,
-        val nextDataIsLoading: Boolean = false
+        val nextDataIsLoading: Boolean
     ) : NewsFeedScreenState()
 
     data class Error(val message: String) : NewsFeedScreenState()

@@ -29,6 +29,7 @@ import com.alexp.vkfast.presentation.ViewModelFactory
 import com.alexp.vkfast.presentation.comments.CommentsScreen
 import com.alexp.vkfast.presentation.favourites.FavouritePostsScreen
 import com.alexp.vkfast.presentation.news.NewsFeedScreen
+import com.alexp.vkfast.presentation.userinfo.UserInfoScreen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
@@ -99,7 +100,14 @@ fun MainScreen() {
                 )
             },
             profileScreenContent = {
+                UserInfoScreen(
+                    paddingValues = paddingValues,
+                    onLogout = {
+                    },
+                    onSwitchAccount = {
+                    }
 
+                )
             },
             commentScreenContent = { newsItem->
                 CommentsScreen(
